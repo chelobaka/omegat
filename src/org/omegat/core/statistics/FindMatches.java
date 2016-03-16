@@ -40,8 +40,6 @@ import org.omegat.core.Core;
 import org.omegat.core.data.EntryKey;
 import org.omegat.core.data.ExternalTMX;
 import org.omegat.core.data.IProject;
-import org.omegat.core.data.IProject.DefaultTranslationsIterator;
-import org.omegat.core.data.IProject.MultipleTranslationsIterator;
 import org.omegat.core.data.PrepareTMXEntry;
 import org.omegat.core.data.SourceTextEntry;
 import org.omegat.core.data.TMXEntry;
@@ -164,27 +162,11 @@ public class FindMatches {
 
         // travel by project entries, including orphaned
         if (project.getProjectProperties().isSupportDefaultTranslations()) {
-            project.iterateByDefaultTranslations(new DefaultTranslationsIterator() {
-                public void iterate(String source, TMXEntry trans) {
-                    checkStopped(stop);
-                    if (!searchExactlyTheSame && source.equals(originalText)) {
-                        // skip original==original entry comparison
-                        return;
-                    }
-                    if (requiresTranslation && trans.translation == null) {
-                        return;
-                    }
-                    String fileName = project.isOrphaned(source) ? orphanedFileName : null;
-                    processEntry(null, source, trans.translation, NearString.MATCH_SOURCE.MEMORY, false, 0,
-                            fileName, trans.creator, trans.creationDate, trans.changer, trans.changeDate,
-                            null);
-                }
-            });
-        }
-        project.iterateByMultipleTranslations(new MultipleTranslationsIterator() {
-            public void iterate(EntryKey source, TMXEntry trans) {
+            project.streamDefaultTranslations().forEach(e -> {
+                String source = e.getKey();
+                TMXEntry trans = e.getValue();
                 checkStopped(stop);
-                if (!searchExactlyTheSame && source.sourceText.equals(originalText)) {
+                if (!searchExactlyTheSame && source.equals(originalText)) {
                     // skip original==original entry comparison
                     return;
                 }
@@ -192,10 +174,24 @@ public class FindMatches {
                     return;
                 }
                 String fileName = project.isOrphaned(source) ? orphanedFileName : null;
-                processEntry(source, source.sourceText, trans.translation, NearString.MATCH_SOURCE.MEMORY,
-                        false, 0, fileName, trans.creator, trans.creationDate, trans.changer,
-                        trans.changeDate, null);
+                processEntry(null, source, trans.translation, NearString.MATCH_SOURCE.MEMORY, false, 0,
+                        fileName, trans.creator, trans.creationDate, trans.changer, trans.changeDate, null);
+            });
+        }
+        project.streamMultipleTranslations().forEach(e -> {
+            EntryKey source = e.getKey();
+            TMXEntry trans = e.getValue();
+            checkStopped(stop);
+            if (!searchExactlyTheSame && source.sourceText.equals(originalText)) {
+                // skip original==original entry comparison
+                return;
             }
+            if (requiresTranslation && trans.translation == null) {
+                return;
+            }
+            String fileName = project.isOrphaned(source) ? orphanedFileName : null;
+            processEntry(source, source.sourceText, trans.translation, NearString.MATCH_SOURCE.MEMORY, false,
+                    0, fileName, trans.creator, trans.creationDate, trans.changer, trans.changeDate, null);
         });
 
         // travel by translation memories

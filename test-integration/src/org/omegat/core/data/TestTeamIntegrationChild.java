@@ -49,7 +49,6 @@ import org.madlonkay.supertmxmerge.data.ResolutionStrategy;
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
 import org.omegat.core.TestCoreInitializer;
-import org.omegat.core.data.IProject.DefaultTranslationsIterator;
 import org.omegat.core.events.IProjectEventListener;
 import org.omegat.core.team2.RemoteRepositoryProvider;
 import org.omegat.core.threads.IAutoSave;
@@ -196,17 +195,16 @@ public class TestTeamIntegrationChild {
             checkTranslationFromFile(tmx, c);
         }
 
-        Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
-            public void iterate(String source, TMXEntry trans) {
-                Long prev = values.get(source);
-                if (prev == null) {
-                    prev = 0L;
-                }
-                long curr = Long.parseLong(trans.translation);
-                if (curr < prev) {
-                    throw new RuntimeException(source + ": Wrong value in " + source + ": current(" + curr
-                            + ") less than previous(" + prev + ")");
-                }
+        Core.getProject().streamDefaultTranslations().forEach(e -> {
+            TMXEntry trans = e.getValue();
+            Long prev = values.get(source);
+            if (prev == null) {
+                prev = 0L;
+            }
+            long curr = Long.parseLong(trans.translation);
+            if (curr < prev) {
+                throw new RuntimeException(source + ": Wrong value in " + source + ": current(" + curr
+                        + ") less than previous(" + prev + ")");
             }
         });
     }

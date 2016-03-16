@@ -1376,9 +1376,9 @@ public class EditorController implements IEditor {
                 if (Preferences.isPreference(Preferences.STOP_ON_ALTERNATIVE_TRANSLATION)) {
                     // when there is at least one alternative translation, then
                     // we can consider that segment is not translated
-                    HasMultipleTranslations checker = new HasMultipleTranslations(ste.getSrcText());
-                    Core.getProject().iterateByMultipleTranslations(checker);
-                    if (checker.found) {
+                    String sourceText = ste.getSrcText();
+                    if (Core.getProject().streamMultipleTranslations()
+                            .filter(e -> sourceText.equals(e.getKey().sourceText)).findAny().isPresent()) {
                         // stop - alternative translation exist
                         return true;
                     }
@@ -2063,29 +2063,6 @@ public class EditorController implements IEditor {
     @Override
     public void windowDeactivated() {
         editor.autoCompleter.setVisible(false);
-    }
-
-    /**
-     * Class for checking if alternative translation exist.
-     */
-    protected static class HasMultipleTranslations implements IProject.MultipleTranslationsIterator {
-        final String sourceEntryText;
-        IProject project;
-        boolean found;
-
-        public HasMultipleTranslations(String sourceEntryText) {
-            this.sourceEntryText = sourceEntryText;
-            project = Core.getProject();
-        }
-
-        public void iterate(EntryKey source, TMXEntry trans) {
-            if (found) {
-                return;
-            }
-            if (sourceEntryText.equals(source.sourceText)) {
-                found = true;
-            }
-        }
     }
 
     @SuppressWarnings("serial")

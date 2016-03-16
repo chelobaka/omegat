@@ -31,7 +31,6 @@ import java.util.List;
 import org.omegat.core.data.EntryKey;
 import org.omegat.core.data.IProject;
 import org.omegat.core.data.SourceTextEntry;
-import org.omegat.core.data.TMXEntry;
 import org.omegat.gui.common.EntryInfoSearchThread;
 
 /**
@@ -56,18 +55,16 @@ public class MultipleTransFindThread extends EntryInfoSearchThread<List<Multiple
 
     protected List<MultipleTransFoundEntry> search() throws Exception {
         final List<MultipleTransFoundEntry> result = new ArrayList<MultipleTransFoundEntry>();
-        project.iterateByDefaultTranslations(new IProject.DefaultTranslationsIterator() {
-            public void iterate(String source, TMXEntry trans) {
-                if (sourceText.equals(source)) {
-                    result.add(new MultipleTransFoundEntry(source, trans));
-                }
+        project.streamDefaultTranslations().forEach(e -> {
+            String source = e.getKey();
+            if (sourceText.equals(source)) {
+                result.add(new MultipleTransFoundEntry(source, e.getValue()));
             }
         });
-        project.iterateByMultipleTranslations(new IProject.MultipleTranslationsIterator() {
-            public void iterate(EntryKey source, TMXEntry trans) {
-                if (sourceText.equals(source.sourceText)) {
-                    result.add(new MultipleTransFoundEntry(source, trans));
-                }
+        project.streamMultipleTranslations().forEach(e -> {
+            EntryKey source = e.getKey();
+            if (sourceText.equals(source.sourceText)) {
+                result.add(new MultipleTransFoundEntry(source, e.getValue()));
             }
         });
 

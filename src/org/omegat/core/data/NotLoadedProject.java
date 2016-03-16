@@ -28,6 +28,8 @@ package org.omegat.core.data;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.omegat.core.data.TMXEntry.ExternalLinked;
 import org.omegat.core.statistics.StatisticsInfo;
@@ -67,10 +69,13 @@ public class NotLoadedProject implements IProject {
         return null;
     }
 
-    public void iterateByDefaultTranslations(DefaultTranslationsIterator it) {
+    public Stream<Entry<String, TMXEntry>> streamDefaultTranslations() {
+        return Stream.empty();
     }
 
-    public void iterateByMultipleTranslations(MultipleTranslationsIterator it) {
+    @Override
+    public Stream<Entry<EntryKey, TMXEntry>> streamMultipleTranslations() {
+        return Stream.empty();
     }
 
     public void setNote(SourceTextEntry entry, TMXEntry oldTrans, String note) {

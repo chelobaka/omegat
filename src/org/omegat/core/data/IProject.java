@@ -30,6 +30,8 @@ package org.omegat.core.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.omegat.core.statistics.StatisticsInfo;
 import org.omegat.tokenizer.ITokenizer;
@@ -165,12 +167,12 @@ public interface IProject {
     /**
      * Iterate by all default translations in project.
      */
-    void iterateByDefaultTranslations(DefaultTranslationsIterator it);
+    Stream<Entry<String, TMXEntry>> streamDefaultTranslations();
 
     /**
      * Iterate by all multiple translations in project.
      */
-    void iterateByMultipleTranslations(MultipleTranslationsIterator it);
+    Stream<Entry<EntryKey, TMXEntry>> streamMultipleTranslations();
 
     /**
      * Check if orphaned.

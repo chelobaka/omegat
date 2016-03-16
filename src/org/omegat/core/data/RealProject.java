@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -57,6 +58,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.madlonkay.supertmxmerge.StmProperties;
 import org.madlonkay.supertmxmerge.SuperTmxMerge;
@@ -1375,28 +1377,22 @@ public class RealProject implements IProject {
         setProjectModified(true);
     }
 
-    @SuppressWarnings("unchecked")
-    public void iterateByDefaultTranslations(DefaultTranslationsIterator it) {
-        Map.Entry<String, TMXEntry>[] entries;
+    public Stream<Entry<String, TMXEntry>> streamDefaultTranslations() {
+        Set<Entry<String, TMXEntry>> entries;
         synchronized (projectTMX) {
             Set<Map.Entry<String, TMXEntry>> set = projectTMX.defaults.entrySet();
-            entries = set.toArray(new Map.Entry[set.size()]);
+            entries = new HashSet<>(set);
         }
-        for (Map.Entry<String, TMXEntry> en : entries) {
-            it.iterate(en.getKey(), en.getValue());
-        }
+        return entries.stream();
     }
 
-    @SuppressWarnings("unchecked")
-    public void iterateByMultipleTranslations(MultipleTranslationsIterator it) {
-        Map.Entry<EntryKey, TMXEntry>[] entries;
+    public Stream<Entry<EntryKey, TMXEntry>> streamMultipleTranslations() {
+        Set<Entry<EntryKey, TMXEntry>> entries;
         synchronized (projectTMX) {
             Set<Map.Entry<EntryKey, TMXEntry>> set = projectTMX.alternatives.entrySet();
-            entries = set.toArray(new Map.Entry[set.size()]);
+            entries = new HashSet<>(set);
         }
-        for (Map.Entry<EntryKey, TMXEntry> en : entries) {
-            it.iterate(en.getKey(), en.getValue());
-        }
+        return entries.stream();
     }
     
     public boolean isOrphaned(String source) {
