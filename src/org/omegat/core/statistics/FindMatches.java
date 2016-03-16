@@ -162,7 +162,9 @@ public class FindMatches {
 
         // travel by project entries, including orphaned
         if (project.getProjectProperties().isSupportDefaultTranslations()) {
-            project.streamDefaultTranslations().forEach(e -> {
+            project.streamDefaultTranslations()
+                    .filter(e -> !searchExactlyTheSame && e.getKey().equals(originalText))
+                    .filter(e -> requiresTranslation && e.getValue().translation == null).forEach(e -> {
                 String source = e.getKey();
                 TMXEntry trans = e.getValue();
                 checkStopped(stop);
