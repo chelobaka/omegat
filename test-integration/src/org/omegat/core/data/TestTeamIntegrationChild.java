@@ -524,10 +524,7 @@ public class TestTeamIntegrationChild {
 
         @Override
         protected void mergeTMX(ProjectTMX baseTMX, ProjectTMX headTMX, StringBuilder commitDetails) {
-            StmProperties props = new StmProperties().setBaseTmxName(OStrings.getString("TMX_MERGE_BASE"))
-                    .setTmx1Name(OStrings.getString("TMX_MERGE_MINE"))
-                    .setTmx2Name(OStrings.getString("TMX_MERGE_THEIRS"))
-                    .setLanguageResource(OStrings.getResourceBundle())
+            StmProperties props = new StmProperties().setLanguageResource(OStrings.getResourceBundle())
                     .setResolutionStrategy(new ResolutionStrategy() {
                         @Override
                         public ITuv resolveConflict(Key key, ITuv baseTuv, ITuv projectTuv, ITuv headTuv) {
@@ -558,10 +555,13 @@ public class TestTeamIntegrationChild {
                             }
                         }
                     });
+            String srcLang = m_config.getSourceLanguage().getLanguage();
+            String trgLang = m_config.getTargetLanguage().getLanguage();
             synchronized (projectTMX) {
                 ProjectTMX mergedTMX = SuperTmxMerge
-                        .merge(baseTMX, projectTMX, headTMX, m_config.getSourceLanguage().getLanguage(),
-                                m_config.getTargetLanguage().getLanguage(), props);
+                        .merge(new SyncTMX(baseTMX, OStrings.getString("TMX_MERGE_BASE"), srcLang, trgLang),
+                                new SyncTMX(projectTMX, OStrings.getString("TMX_MERGE_MINE"), srcLang, trgLang),
+                                new SyncTMX(headTMX, OStrings.getString("TMX_MERGE_THEIRS"), srcLang, trgLang), props);
                 projectTMX.replaceContent(mergedTMX);
             }
             commitDetails.append('\n');
